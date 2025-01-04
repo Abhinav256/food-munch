@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Login</title>
+    <script type="text/javascript">
+        // Function to handle form submission and authentication
+        function authenticate(event) {
+            event.preventDefault();  // Prevent form from submitting traditionally
+
+            // Get username and password from input fields
+            var username = document.getElementById('txtUserName').value;
+            var password = document.getElementById('txtPassword').value;
+
+            // Simulating reading users from localStorage (acting as the log.txt file)
+            var users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Find the user in the stored users
+            var user = users.find(function (user) {
+                return user.username === username && user.password === password;
+            });
+
+            if (user) {
+                alert("Login successful!");
+                // Redirect to another page or display a success message
+                window.location.href = "login.html";  // Example redirect
+            } else {
+                alert("Invalid username or password.");
+            }
+        }
+
+        // Disable right-click context menu
+        var message = "Function Disabled!";
+        function clickIE4() {
+            if (event.button == 2) {
+                alert(message);
+                return false;
+            }
+        }
+
+        function clickNS4(e) {
+            if (document.layers || document.getElementById && !document.all) {
+                if (e.which == 2 || e.which == 3) {
+                    alert(message);
+                    return false;
+                }
+            }
+        }
+
+        if (document.layers) {
+            document.captureEvents(Event.MOUSEDOWN);
+            document.onmousedown = clickNS4;
+        } else if (document.all && !document.getElementById) {
+            document.onmousedown = clickIE4;
+        }
+        document.oncontextmenu = new Function("return false");
+    </script>
+</head>
+
+<style type="text/css">
+    .login {
+        height: 1000px;
+        width: 100%;
+        background-color: #9ca8b5;
+        position: relative;
+        color: White;
+        text-align: center;
+    }
+
+    .login_box {
+        width: 1050px;
+        height: 600px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 1px 4px 22px -8px #0004;
+        display: flex;
+        overflow: hidden;
+    }
+
+    .left .contact {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-self: center;
+        height: 100%;
+        width: 73%;
+        margin: auto;
+    }
+
+    .submit {
+        border: none;
+        padding: 25px 80px;
+        border-radius: 25px;
+        display: block;
+        margin: auto;
+        margin-top: 120px;
+        color: #fff;
+        font-weight: bold;
+        -webkit-box-shadow: 0px 9px 15px -11px rgba(88, 54, 114, 1);
+        -moz-box-shadow: 0px 9px 15px -11px rgba(88, 54, 114, 1);
+        box-shadow: 0px 9px 15px -11px rgba(88, 54, 114, 1);
+    }
+
+    .left .top_link {
+        height: 20px;
+    }
+
+    .left input {
+        border: none;
+        width: 80%;
+        margin: 15px 0px;
+        border-bottom: 1px solid #4f30677d;
+        padding: 7px 9px;
+        width: 100%;
+        overflow: hidden;
+        background: transparent;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .left h3 {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .right {
+        background: url("https://media-hosting.imagekit.io//a11db132e30a4d23/pngwing.com1_.png.webp?Expires=1736160384&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=jNyGLsJ8vOUbFs9YsY8tMxbXLZ0RpPsxBf7VTMtExvWx-sHSBQ8egki1YLwaalrWCrw0zDeBtvwC4Q~AortzasGG-A7q9gCFaiqfwkBJbiB3hArmLpHOp24qLS-3n9HNKrCNjiZ0xNl~NXktxOaCaHPpr7tnCSJg1H8NQ6Rdxm2CMrZFFeSnftYCy4Tg0MeUDVWDge3lkPusEbVQsFY1XcJPTgIlTYNjZ3M3F4Vtrj0wDLpHirjJH2oP6CvrzpCTKlWZnJJId1GF8vd1YGltf6DnGkJbLnA7F193n7DiG3e4F08Rjtk2sQFsWzwCswc-JggO-cLVO1wBBBVfSmlGDQ__");
+        color: #ff0808;
+        position: relative;
+        height: 150vh;
+        width: 100vw;
+        background-size: cover;
+    }
+
+    .right .right-text {
+        height: 100%;
+        position: relative;
+        transform: translate(0%, 45%);
+    }
+
+    .right-text h2 {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 50px;
+        font-weight: 500;
+    }
+
+    .right-text h5 {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 25px;
+        font-weight: 400;
+    }
+
+    .right-text h6 {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 17px;
+        font-weight: 300;
+        top: 20px;
+    }
+
+    .right .right-inductor {
+        position: absolute;
+        width: 70px;
+        height: 7px;
+        background: #fff0;
+        left: 50%;
+        bottom: 70px;
+        transform: translate(-50%, 0%);
+    }
+
+    .login_box .left {
+        width: 50%;
+        height: 100%;
+        padding: 25px 25px;
+    }
+
+    .login_box .right {
+        width: 50%;
+        height: 100%;
+    }
+</style>
+
+<body>
+<span id="lblBranch" style="color: #660066; font-family: 'Arial Narrow'; font-size: medium"></span>
+<section class="login">
+    <div class="login_box">
+        <div class="left">
+            <div class="contact">
+                <form onsubmit="authenticate(event)" id="loginForm">
+                    <div>
+                        <img alt="" src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/food-munch-img.png" style="width: 300px; height: 150px" />
+                    </div>
+                    <h3>SIGN IN</h3>
+                    <input name="txtUserName" type="text" id="txtUserName" placeholder="Username" required />
+                    <input name="txtPassword" type="password" id="txtPassword" placeholder="Password" required />
+                    <input type="submit" value="LET'S GO" class="submit" style="background-color:#583672;" />
+                    <a href="signup.html" style="text-align: center;font-weight:bold;color:Maroon">
+                        Don't have an account? Sign up here!
+                    </a>
+                </form>
+            </div>
+        </div>
+        <div class="right">
+            <div class="right-text">
+                <h2></h2>
+                <h5></h5>
+                <div class="right-inductor">
+                    <img src="" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    
+</section>
+</body>
+</html>
