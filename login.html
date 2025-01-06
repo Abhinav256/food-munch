@@ -677,6 +677,50 @@
     </div>
 
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const cartItems = [];
+            const cartSection = document.getElementById("sectionCart");
+            const cartContent = document.createElement("div");
+            cartContent.classList.add("container", "mt-5");
+            cartSection.appendChild(cartContent);
+
+            const addToCartLinks = document.querySelectorAll(".menu-item-link");
+
+            addToCartLinks.forEach((link) => {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    const menuCard = link.closest(".menu-item-card");
+                    const itemTitle = menuCard.querySelector(".menu-card-title").textContent.trim();
+                    const itemImage = menuCard.querySelector(".menu-item-image").src;
+
+                    cartItems.push({ title: itemTitle, image: itemImage });
+                    updateCartUI();
+                });
+            });
+
+            const updateCartUI = () => {
+                cartContent.innerHTML = `
+                    <h2 class="mb-4">Cart Items</h2>
+                    ${cartItems.map((item) => `
+                        <div class="row mb-3 align-items-center">
+                            <div class="col-md-2">
+                                <img src="${item.image}" class="w-100" />
+                            </div>
+                            <div class="col-md-8">
+                                <h5>${item.title}</h5>
+                            </div>
+                        </div>
+                    `).join("")}
+                    <button class="btn btn-primary mt-3" onclick="alert('Checkout functionality coming soon!')">
+                        Checkout
+                    </button>
+                `;
+                cartSection.style.display = "block";
+            };
+        });
+    </script>
+
 
     <script type="text/javascript" src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-static-website/js/ccbp-ui-kit.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
