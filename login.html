@@ -713,11 +713,11 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const cartItems = [];
-            const cartContent = document.getElementById("cartContent");
+            const cartItemsList = document.getElementById("cartItemsList");
             const totalPriceElement = document.getElementById("totalPrice");
             const checkoutButton = document.getElementById("checkoutBtn");
 
-            // Add to Cart Click Event
+            // Add to Cart Event
             document.querySelectorAll('.menu-item-link').forEach((link) => {
                 link.addEventListener('click', function(event) {
                     event.preventDefault();
@@ -738,15 +738,9 @@
             });
 
             const updateCartUI = () => {
-                cartContent.innerHTML = cartItems.map((item, index) => `
-                    <div class="row mb-3">
-                        <div class="col-md-8">
-                            <h5>${item.title}</h5>
-                            <p>₹${item.price} x ${item.quantity}</p>
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-sm btn-danger" onclick="removeItem(${index})">Remove</button>
-                        </div>
+                cartItemsList.innerHTML = cartItems.map(item => `
+                    <div class="cart-item">
+                        <h5>${item.title} x ${item.quantity} = ₹${(item.price * item.quantity).toFixed(2)}</h5>
                     </div>
                 `).join('');
 
@@ -754,23 +748,18 @@
                 totalPriceElement.textContent = totalPrice.toFixed(2);
             };
 
-            const removeItem = (index) => {
-                cartItems.splice(index, 1);
-                updateCartUI();
-            };
-
             // Generate PDF Function
             const generatePDF = () => {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
-                // Add logo
+                // Add Logo
                 const logoUrl = "https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/food-munch-img.png";
                 doc.addImage(logoUrl, "PNG", 10, 10, 40, 20);
 
                 // Title
                 doc.setFontSize(18);
-                doc.text("FoodMunch Bill", 70, 25);
+                doc.text("FoodMunch Invoice", 70, 25);
 
                 // Prepare Table Data
                 const tableData = cartItems.map(item => [
@@ -802,7 +791,7 @@
                 doc.save("foodmunch-bill.pdf");
             };
 
-            // Checkout Button
+            // Checkout Button Event
             checkoutButton.addEventListener("click", () => {
                 if (cartItems.length > 0) {
                     generatePDF();
