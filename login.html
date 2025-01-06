@@ -693,6 +693,7 @@
     </div>
 
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const cartItems = [];
@@ -765,29 +766,30 @@
                 });
             };
 
-            const generateBill = () => {
-                let billText = "Bill Summary\n\n";
-                let totalAmount = 0;
+            const generatePDF = () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-                cartItems.forEach((item) => {
+                doc.setFontSize(16);
+                doc.text("Bill Summary", 10, 10);
+
+                let startY = 20;
+                cartItems.forEach((item, index) => {
                     const itemTotal = item.price * item.quantity;
-                    totalAmount += itemTotal;
-                    billText += `${item.title} - ₹${item.price} x ${item.quantity} = ₹${itemTotal.toFixed(2)}\n`;
+                    doc.text(`${index + 1}. ${item.title}`, 10, startY);
+                    doc.text(`₹${item.price} x ${item.quantity} = ₹${itemTotal.toFixed(2)}`, 60, startY);
+                    startY += 10;
                 });
 
-                billText += `\nTotal Amount: ₹${totalAmount.toFixed(2)}`;
+                const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+                doc.text(`Total Amount: ₹${totalAmount.toFixed(2)}`, 10, startY + 10);
 
-                // Download as bill.txt
-                const blob = new Blob([billText], { type: "text/plain" });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = "bill.txt";
-                link.click();
+                doc.save("bill.pdf");
             };
 
             checkoutButton.addEventListener("click", () => {
                 if (cartItems.length > 0) {
-                    generateBill();
+                    generatePDF();
                 } else {
                     alert("Your cart is empty!");
                 }
