@@ -781,7 +781,7 @@
                 const blob = new Blob([billText], { type: "text/plain" });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = "bill.pdf";
+                link.download = "bill.txt";
                 link.click();
             };
 
