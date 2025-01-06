@@ -696,69 +696,114 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const cartItems = [
-            // Example cart items (this should dynamically populate from your application)
-            { title: "Non-Veg Starters", price: 750, quantity: 2 },
-            { title: "Veg Starters", price: 500, quantity: 1 },
-        ];
+        document.addEventListener("DOMContentLoaded", () => {
+            const cartItems = [];
+            const cartContent = document.getElementById("cartContent");
+            const totalPriceElement = document.getElementById("totalPrice");
+            const checkoutButton = document.getElementById("checkoutBtn");
 
-        const checkoutButton = document.getElementById("checkoutBtn");
+            const addToCartLinks = document.querySelectorAll(".menu-item-link");
 
-        const generatePDF = () => {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            addToCartLinks.forEach((link) => {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    const menuCard = link.closest(".menu-item-card");
+                    const itemTitle = menuCard.querySelector(".menu-card-title").textContent.trim();
+                    const itemImage = menuCard.querySelector(".menu-item-image").src;
+                    const itemPrice = parseFloat(menuCard.querySelector(".menu-item-price").textContent.replace("Price: ₹", "").trim());
 
-            // Add Logo
-            const logoUrl = "https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/food-munch-img.png";
-            doc.addImage(logoUrl, "PNG", 10, 10, 40, 20);
+                    const existingItem = cartItems.find((item) => item.title === itemTitle);
 
-            // Title
-            doc.setFontSize(18);
-            doc.text("FoodMunch Bill", 70, 25);
-
-            // Generate Table Data
-            const tableData = cartItems.map((item) => [
-                item.title,
-                `₹${item.price.toFixed(2)}`,
-                item.quantity,
-                `₹${(item.price * item.quantity).toFixed(2)}`
-            ]);
-
-            const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-            const gst = totalPrice * 0.12;
-            const finalTotal = totalPrice + gst;
-
-            // Add Table
-            doc.autoTable({
-                startY: 40,
-                head: [["Item", "Price", "Quantity", "Total"]],
-                body: tableData,
+                    if (existingItem) {
+                        existingItem.quantity += 1;
+                    } else {
+                        cartItems.push({ title: itemTitle, image: itemImage, price: itemPrice, quantity: 1 });
+                    }
+                    updateCartUI();
+                });
             });
 
-            // Add Totals
-            const finalY = doc.autoTable.previous.finalY + 10;
-            doc.text(`Subtotal: ₹${totalPrice.toFixed(2)}`, 14, finalY);
-            doc.text(`GST (12%): ₹${gst.toFixed(2)}`, 14, finalY + 10);
-            doc.setFont("bold");
-            doc.text(`Total: ₹${finalTotal.toFixed(2)}`, 14, finalY + 20);
+            const updateCartUI = () => {
+                cartContent.innerHTML = cartItems.map((item, index) => `
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-md-2">
+                            <img src="${item.image}" class="w-100" />
+                        </div>
+                        <div class="col-md-4">
+                            <h5>${item.title}</h5>
+                            <p>Price: ₹${item.price}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" class="form-control quantity-input" min="1" value="${item.quantity}" data-index="${index}" />
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button>
+                        </div>
+                    </div>
+                `).join("");
 
-            // Download PDF
-            doc.save("bill.pdf");
-        };
+                updateTotalPrice();
+                attachQuantityListeners();
+            };
 
-        checkoutButton.addEventListener("click", () => {
-            if (cartItems.length > 0) {
-                generatePDF();
-            } else {
-                alert("Your cart is empty!");
-            }
+            const updateTotalPrice = () => {
+                const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+                totalPriceElement.textContent = `Total Price: ₹${totalPrice.toFixed(2)}`;
+            };
+
+            const attachQuantityListeners = () => {
+                const quantityInputs = document.querySelectorAll(".quantity-input");
+                quantityInputs.forEach((input) => {
+                    input.addEventListener("change", (event) => {
+                        const index = parseInt(event.target.getAttribute("data-index"), 10);
+                        const newQuantity = parseInt(event.target.value, 10);
+                        if (newQuantity > 0) {
+                            cartItems[index].quantity = newQuantity;
+                            updateTotalPrice();
+                        } else {
+                            event.target.value = cartItems[index].quantity; // Reset to current value
+                        }
+                    });
+                });
+            };
+
+            const generatePDF = () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFontSize(16);
+                doc.text("Bill Summary", 10, 10);
+
+                let startY = 20;
+                cartItems.forEach((item, index) => {
+                    const itemTotal = item.price * item.quantity;
+                    doc.text(`${index + 1}. ${item.title}`, 10, startY);
+                    doc.text(`₹${item.price} x ${item.quantity} = ₹${itemTotal.toFixed(2)}`, 60, startY);
+                    startY += 10;
+                });
+
+                const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+                doc.text(`Total Amount: ₹${totalAmount.toFixed(2)}`, 10, startY + 10);
+
+                doc.save("bill.pdf");
+            };
+
+            checkoutButton.addEventListener("click", () => {
+                if (cartItems.length > 0) {
+                    generatePDF();
+                } else {
+                    alert("Your cart is empty!");
+                }
+            });
+
+            window.removeItem = (index) => {
+                cartItems.splice(index, 1);
+                updateCartUI();
+            };
         });
-    });
-</script>
+    </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
 
 
     <script type="text/javascript" src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-static-website/js/ccbp-ui-kit.js"></script>
