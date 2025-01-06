@@ -439,6 +439,7 @@
                         <div class="shadow menu-item-card p-3 mb-3">
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/em-ginger-fried-img.png" class="menu-item-image w-100" />
                             <h1 class="menu-card-title">Non-Veg Starters</h1>
+                            <p class="menu-item-price">Price: ₹750</p>
                             <a onclick="addtocart()" class="menu-item-link">
                                 Add to cart
                             </a>
@@ -448,6 +449,7 @@
                         <div class="shadow menu-item-card p-3 mb-3">
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/em-veg-starters-img.png" class="menu-item-image w-100" />
                             <h1 class="menu-card-title">Veg Starters</h1>
+                            <p class="menu-item-price">Price: ₹500</p>
                             <a onclick="addtocart()" class="menu-item-link">
                                 Add to cart
                             </a>
@@ -457,6 +459,7 @@
                         <div class="menu-item-card shadow p-3 mb-3">
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/em-soup-img.png" class="menu-item-image w-100" />
                             <h1 class="menu-card-title">Soups</h1>
+                            <p class="menu-item-price">Price: ₹300</p>
                             <a onclick="addtocart()" class="menu-item-link">
                                 Add to cart
                             </a>
@@ -466,6 +469,7 @@
                         <div class="menu-item-card shadow p-3 mb-3">
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/em-grilled-seafood-img.png" class="menu-item-image w-100" />
                             <h1 class="menu-card-title">Fish & Sea food</h1>
+                            <p class="menu-item-price">Price: ₹1000</p>
                             <a onclick="addtocart()" class="menu-item-link">
                                 Add to cart
                             </a>
@@ -475,6 +479,7 @@
                         <div class="menu-item-card shadow p-3 mb-3">
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/em-hyderabadi-biryani-img.png" class="menu-item-image w-100" />
                             <h1 class="menu-card-title">Main Course</h1>
+                            <p class="menu-item-price">Price: ₹1000</p>
                             <a onclick="addtocart()" class="menu-item-link">
                                 Add to cart
                             </a>
@@ -484,6 +489,7 @@
                         <div class="menu-item-card shadow p-3 mb-3">
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/em-mushroom-noodles-img.png" class="menu-item-image w-100" />
                             <h1 class="menu-card-title">Noodles</h1>
+                            <p class="menu-item-price">Price: ₹100</p>
                             <a onclick="addtocart()" class="menu-item-link">
                                 Add to cart
                             </a>
@@ -493,6 +499,7 @@
                         <div class="menu-item-card shadow p-3 mb-3">
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/em-gluten-img.png" class="menu-item-image w-100" />
                             <h1 class="menu-card-title">Salads</h1>
+                            <p class="menu-item-price">Price: ₹300</p>
                             <a onclick="addtocart()" class="menu-item-link">
                                 Add to cart
                             </a>
@@ -502,6 +509,7 @@
                         <div class="menu-item-card shadow p-3 mb-3">
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/em-coffee-bourbon-img.png" class="menu-item-image w-100" />
                             <h1 class="menu-card-title">Desserts</h1>
+                            <p class="menu-item-price">Price: ₹450</p>
                             <a onclick="addtocart()" class="menu-item-link">
                                 Add to cart
                             </a>
@@ -674,16 +682,23 @@
                 </div>
             </div>
         </nav>
+        <div class="container mt-5">
+            <h2 class="mb-4">Cart Items</h2>
+            <div id="cartContent"></div>
+            <div class="mt-4">
+                <h4 id="totalPrice">Total Price: ₹0</h4>
+                <button class="btn btn-primary mt-3" id="checkoutBtn">Checkout</button>
+            </div>
+        </div>
     </div>
 
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const cartItems = [];
-            const cartSection = document.getElementById("sectionCart");
-            const cartContent = document.createElement("div");
-            cartContent.classList.add("container", "mt-5");
-            cartSection.appendChild(cartContent);
+            const cartContent = document.getElementById("cartContent");
+            const totalPriceElement = document.getElementById("totalPrice");
+            const checkoutButton = document.getElementById("checkoutBtn");
 
             const addToCartLinks = document.querySelectorAll(".menu-item-link");
 
@@ -693,30 +708,94 @@
                     const menuCard = link.closest(".menu-item-card");
                     const itemTitle = menuCard.querySelector(".menu-card-title").textContent.trim();
                     const itemImage = menuCard.querySelector(".menu-item-image").src;
+                    const itemPrice = parseFloat(menuCard.querySelector(".menu-item-price").textContent.replace("Price: ₹", "").trim());
 
-                    cartItems.push({ title: itemTitle, image: itemImage });
+                    const existingItem = cartItems.find((item) => item.title === itemTitle);
+
+                    if (existingItem) {
+                        existingItem.quantity += 1;
+                    } else {
+                        cartItems.push({ title: itemTitle, image: itemImage, price: itemPrice, quantity: 1 });
+                    }
                     updateCartUI();
                 });
             });
 
             const updateCartUI = () => {
-                cartContent.innerHTML = `
-                    <h2 class="mb-4">Cart Items</h2>
-                    ${cartItems.map((item) => `
-                        <div class="row mb-3 align-items-center">
-                            <div class="col-md-2">
-                                <img src="${item.image}" class="w-100" />
-                            </div>
-                            <div class="col-md-8">
-                                <h5>${item.title}</h5>
-                            </div>
+                cartContent.innerHTML = cartItems.map((item, index) => `
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-md-2">
+                            <img src="${item.image}" class="w-100" />
                         </div>
-                    `).join("")}
-                    <button class="btn btn-primary mt-3" onclick="alert('Checkout functionality coming soon!')">
-                        Checkout
-                    </button>
-                `;
-                cartSection.style.display = "block";
+                        <div class="col-md-4">
+                            <h5>${item.title}</h5>
+                            <p>Price: ₹${item.price}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" class="form-control quantity-input" min="1" value="${item.quantity}" data-index="${index}" />
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button>
+                        </div>
+                    </div>
+                `).join("");
+
+                updateTotalPrice();
+                attachQuantityListeners();
+            };
+
+            const updateTotalPrice = () => {
+                const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+                totalPriceElement.textContent = `Total Price: ₹${totalPrice.toFixed(2)}`;
+            };
+
+            const attachQuantityListeners = () => {
+                const quantityInputs = document.querySelectorAll(".quantity-input");
+                quantityInputs.forEach((input) => {
+                    input.addEventListener("change", (event) => {
+                        const index = parseInt(event.target.getAttribute("data-index"), 10);
+                        const newQuantity = parseInt(event.target.value, 10);
+                        if (newQuantity > 0) {
+                            cartItems[index].quantity = newQuantity;
+                            updateTotalPrice();
+                        } else {
+                            event.target.value = cartItems[index].quantity; // Reset to current value
+                        }
+                    });
+                });
+            };
+
+            const generateBill = () => {
+                let billText = "Bill Summary\n\n";
+                let totalAmount = 0;
+
+                cartItems.forEach((item) => {
+                    const itemTotal = item.price * item.quantity;
+                    totalAmount += itemTotal;
+                    billText += `${item.title} - ₹${item.price} x ${item.quantity} = ₹${itemTotal.toFixed(2)}\n`;
+                });
+
+                billText += `\nTotal Amount: ₹${totalAmount.toFixed(2)}`;
+
+                // Download as bill.txt
+                const blob = new Blob([billText], { type: "text/plain" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "bill.txt";
+                link.click();
+            };
+
+            checkoutButton.addEventListener("click", () => {
+                if (cartItems.length > 0) {
+                    generateBill();
+                } else {
+                    alert("Your cart is empty!");
+                }
+            });
+
+            window.removeItem = (index) => {
+                cartItems.splice(index, 1);
+                updateCartUI();
             };
         });
     </script>
