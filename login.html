@@ -23,9 +23,7 @@
     </script>
     <style>
         @import url("https://fonts.googleapis.com/css2?family=Bree+Serif&family=Caveat:wght@400;700&family=Lobster&family=Monoton&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display+SC:ital,wght@0,400;0,700;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Source+Sans+Pro:ital,wght@0,400;0,700;1,700&family=Work+Sans:ital,wght@0,400;0,700;1,700&display=swap");
-        #checkoutForm {
-            display: none;
-        }
+
         .food-munch-logo {
             width: 80px;
             height: 70px;
@@ -693,120 +691,7 @@
             </div>
         </div>
     </div>
-    <div id="checkoutForm" class="mt-4">
-        <h2>Enter Customer Details</h2>
-        <form id="customerDetailsForm">
-            <div class="form-group">
-                <label for="customerName">Name</label>
-                <input type="text" id="customerName" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="customerAddress">Address</label>
-                <textarea id="customerAddress" class="form-control" rows="3" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="houseNumber">House Number</label>
-                <input type="text" id="houseNumber" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="phoneNumber">Phone Number</label>
-                <input type="tel" id="phoneNumber" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="pinCode">PIN Code</label>
-                <input type="text" id="pinCode" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-success">Order Now</button>
-        </form>
-    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const cartItems = [];
-            const cartItemsList = document.getElementById("cartItemsList");
-            const totalPriceElement = document.getElementById("totalPrice");
-            const checkoutButton = document.getElementById("checkoutBtn");
-            const checkoutForm = document.getElementById("checkoutForm");
-            const customerDetailsForm = document.getElementById("customerDetailsForm");
-
-            // Add to cart logic
-            document.querySelectorAll(".menu-item-link").forEach((link) => {
-                link.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    const menuCard = link.closest(".menu-item-card");
-                    const itemTitle = menuCard.querySelector("h3").textContent.trim();
-                    const itemPrice = parseFloat(menuCard.querySelector(".menu-item-price").textContent.replace("Price: ₹", "").trim());
-
-                    const existingItem = cartItems.find((item) => item.title === itemTitle);
-
-                    if (existingItem) {
-                        existingItem.quantity += 1;
-                    } else {
-                        cartItems.push({ title: itemTitle, price: itemPrice, quantity: 1 });
-                    }
-
-                    updateCartUI();
-                });
-            });
-
-            const updateCartUI = () => {
-                cartItemsList.innerHTML = cartItems.map((item) => `
-                    <div>
-                        ${item.title} x ${item.quantity} = ₹${(item.price * item.quantity).toFixed(2)}
-                    </div>
-                `).join("");
-
-                const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-                totalPriceElement.textContent = totalPrice.toFixed(2);
-            };
-
-            checkoutButton.addEventListener("click", () => {
-                if (cartItems.length === 0) {
-                    alert("Your cart is empty!");
-                    return;
-                }
-                checkoutForm.style.display = "block";
-            });
-
-            customerDetailsForm.addEventListener("submit", (event) => {
-                event.preventDefault();
-
-                const customerName = document.getElementById("customerName").value;
-                const customerAddress = document.getElementById("customerAddress").value;
-                const houseNumber = document.getElementById("houseNumber").value;
-                const phoneNumber = document.getElementById("phoneNumber").value;
-                const pinCode = document.getElementById("pinCode").value;
-
-                generatePDF(customerName, customerAddress, houseNumber, phoneNumber, pinCode);
-            });
-
-            const generatePDF = (name, address, houseNumber, phone, pin) => {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                doc.setFontSize(16);
-                doc.text("Invoice", 10, 10);
-
-                doc.text(`Name: ${name}`, 10, 20);
-                doc.text(`Address: ${address}`, 10, 30);
-                doc.text(`House Number: ${houseNumber}`, 10, 40);
-                doc.text(`Phone: ${phone}`, 10, 50);
-                doc.text(`PIN Code: ${pin}`, 10, 60);
-
-                let startY = 70;
-                cartItems.forEach((item, index) => {
-                    doc.text(`${index + 1}. ${item.title} x ${item.quantity} = ₹${(item.price * item.quantity).toFixed(2)}`, 10, startY);
-                    startY += 10;
-                });
-
-                const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-                doc.text(`Total Amount: ₹${totalAmount.toFixed(2)}`, 10, startY + 10);
-
-                doc.save("invoice.pdf");
-            };
-        });
-    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
