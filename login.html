@@ -564,7 +564,7 @@
                             Plus, you get a 5% discount on every order every time you pay
                             online.
                         </p>
-                        <button class="custom-button">Order Now</button>
+                        <button class="custom-button" href="#sectionCart" onclick="display('sectionCart')">Order Now</button>
                         <div class="mt-3">
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/visa-card-img.png" class="payment-card-img" />
                             <img src="https://d1tgh8fmlzexmh.cloudfront.net/ccbp-responsive-website/master-card-img.png" class="payment-card-img" />
@@ -683,27 +683,66 @@
             </div>
         </nav>
         <div class="container mt-5">
-            <h2 class="mb-4">Cart Items</h2>
+            <h2 class="mb-4" style="margin-top: 100px;">Cart Items</h2>
             <div id="cartContent"></div>
             <div class="mt-4">
                 <h4 id="totalPrice">Total Price: ₹0</h4>
                 <button class="btn btn-primary mt-3" id="checkoutBtn">Checkout</button>
             </div>
         </div>
+    
+        <!-- Customer Details Modal -->
+        <div class="modal fade" id="customerDetailsModal" tabindex="-1" role="dialog" aria-labelledby="customerDetailsLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="customerDetailsLabel">Enter Your Details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="customerDetailsForm">
+                            <div class="form-group">
+                                <label for="customerName">Name</label>
+                                <input type="text" class="form-control" id="customerName" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="customerPhone">Phone Number</label>
+                                <input type="text" class="form-control" id="customerPhone" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="customerAddress">Address</label>
+                                <textarea class="form-control" id="customerAddress" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerPincode">Pincode</label>
+                                <input type="text" class="form-control" id="customerPincode" required />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveDetailsBtn">Save Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const cartItems = [];
+            const customerDetails = {};
             const cartContent = document.getElementById("cartContent");
             const totalPriceElement = document.getElementById("totalPrice");
             const checkoutButton = document.getElementById("checkoutBtn");
-
+    
             const addToCartLinks = document.querySelectorAll(".menu-item-link");
-
+    
             addToCartLinks.forEach((link) => {
                 link.addEventListener("click", (event) => {
                     event.preventDefault();
@@ -711,9 +750,9 @@
                     const itemTitle = menuCard.querySelector(".menu-card-title").textContent.trim();
                     const itemImage = menuCard.querySelector(".menu-item-image").src;
                     const itemPrice = parseFloat(menuCard.querySelector(".menu-item-price").textContent.replace("Price: ₹", "").trim());
-
+    
                     const existingItem = cartItems.find((item) => item.title === itemTitle);
-
+    
                     if (existingItem) {
                         existingItem.quantity += 1;
                     } else {
@@ -722,7 +761,7 @@
                     updateCartUI();
                 });
             });
-
+    
             const updateCartUI = () => {
                 cartContent.innerHTML = cartItems.map((item, index) => `
                     <div class="row mb-3 align-items-center">
@@ -741,16 +780,16 @@
                         </div>
                     </div>
                 `).join("");
-
+    
                 updateTotalPrice();
                 attachQuantityListeners();
             };
-
+    
             const updateTotalPrice = () => {
                 const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
                 totalPriceElement.textContent = `Total Price: ₹${totalPrice.toFixed(2)}`;
             };
-
+    
             const attachQuantityListeners = () => {
                 const quantityInputs = document.querySelectorAll(".quantity-input");
                 quantityInputs.forEach((input) => {
@@ -766,42 +805,105 @@
                     });
                 });
             };
-
+    
             const generatePDF = () => {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-
-                doc.setFontSize(16);
-                doc.text("Bill Summary", 10, 10);
-
-                let startY = 20;
-                cartItems.forEach((item, index) => {
-                    const itemTotal = item.price * item.quantity;
-                    doc.text(`${index + 1}. ${item.title}`, 10, startY);
-                    doc.text(`₹${item.price} x ${item.quantity} = ₹${itemTotal.toFixed(2)}`, 60, startY);
-                    startY += 10;
+    
+                // Header
+                doc.setFontSize(18);
+                doc.text("Food Munch", 90, 10);
+                doc.setFontSize(14);
+                doc.text("Bill", 90, 20);
+    
+                // Customer Details
+                doc.setFontSize(10);
+                doc.text(`Name: ${customerDetails.name}`, 10, 30);
+                doc.text(`Phone: ${customerDetails.phone}`, 10, 35);
+                doc.text(`Address: ${customerDetails.address}`, 10, 40);
+                doc.text(`Pincode: ${customerDetails.pincode}`, 10, 45);
+    
+                // Table Header
+                doc.autoTable({
+                    head: [['Sr No.', 'Description', 'Quantity', 'Unit Price', 'Amount']],
+                    body: cartItems.map((item, index) => [
+                        index + 1,
+                        item.title,
+                        item.quantity,
+                        `₹${item.price.toFixed(2)}`,
+                        `₹${(item.quantity * item.price).toFixed(2)}`,
+                    ]),
+                    startY: 50,
                 });
-
-                const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-                doc.text(`Total Amount: ₹${totalAmount.toFixed(2)}`, 10, startY + 10);
-
+    
+                // Subtotal, Taxes, and Total
+                const finalY = doc.lastAutoTable.finalY + 10;
+                const subtotal = cartItems.reduce(
+                    (sum, item) => sum + item.quantity * item.price,
+                    0
+                );
+                const cgst = (subtotal * 0.025).toFixed(2); // 2.5% CGST
+                const sgst = (subtotal * 0.025).toFixed(2); // 2.5% SGST
+                const total = subtotal + parseFloat(cgst) + parseFloat(sgst);
+    
+                doc.text(`Subtotal: ₹${subtotal.toFixed(2)}`, 150, finalY);
+                doc.text(`CGST (2.5%): ₹${cgst}`, 150, finalY + 5);
+                doc.text(`SGST (2.5%): ₹${sgst}`, 150, finalY + 10);
+                doc.text(`Total: ₹${total.toFixed(2)}`, 150, finalY + 15);
+    
+                // Footer
+                doc.setFontSize(9);
+                doc.text(
+                    "This Bill is issued by Abhinav Reddy",
+                    10,
+                    270
+                );
+                doc.text(
+                    "In compliance with section 9(5) of the CGST Act 2017 and corresponding sections.",
+                    10,
+                    275
+                );
+    
+                // Save the PDF
                 doc.save("bill.pdf");
             };
-
+    
             checkoutButton.addEventListener("click", () => {
                 if (cartItems.length > 0) {
-                    generatePDF();
+                    // Open modal to get customer details
+                    $("#customerDetailsModal").modal("show");
                 } else {
                     alert("Your cart is empty!");
                 }
             });
-
+    
+            document.getElementById("saveDetailsBtn").addEventListener("click", () => {
+                const name = document.getElementById("customerName").value.trim();
+                const phone = document.getElementById("customerPhone").value.trim();
+                const address = document.getElementById("customerAddress").value.trim();
+                const pincode = document.getElementById("customerPincode").value.trim();
+    
+                if (name && phone && address && pincode) {
+                    customerDetails.name = name;
+                    customerDetails.phone = phone;
+                    customerDetails.address = address;
+                    customerDetails.pincode = pincode;
+    
+                    $("#customerDetailsModal").modal("hide");
+                    generatePDF();
+                } else {
+                    alert("Please fill in all the fields!");
+                }
+            });
+    
             window.removeItem = (index) => {
                 cartItems.splice(index, 1);
                 updateCartUI();
             };
         });
     </script>
+    
+    
 
     
 
